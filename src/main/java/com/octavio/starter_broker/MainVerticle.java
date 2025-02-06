@@ -38,6 +38,7 @@ public class MainVerticle extends AbstractVerticle {
         .end(new JsonObject().put("message", "Somthing went error :(").toBuffer());
 
     });
+
     AssetsRestApi.attach(restApi);
     QuotesResApi.attach(restApi);
     WatchListResAPI.attach(restApi);
