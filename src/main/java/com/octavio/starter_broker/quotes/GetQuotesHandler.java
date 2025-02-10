@@ -1,7 +1,6 @@
 package com.octavio.starter_broker.quotes;
 
 import com.octavio.starter_broker.assets.Asset;
-import com.octavio.starter_broker.assets.AssetsRestApi;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -15,6 +14,8 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.octavio.starter_broker.assets.AssetsRestApi.ASSETS;
+
 
 public class GetQuotesHandler implements Handler<RoutingContext> {
 
@@ -27,7 +28,7 @@ public class GetQuotesHandler implements Handler<RoutingContext> {
     final Integer idParam = Integer.valueOf(context.pathParam("id"));
 
 
-    var maybeQuote = Optional.ofNullable(AssetsRestApi.ASSETS.get(idParam));
+    var maybeQuote = Optional.ofNullable(ASSETS.get(idParam));
     if (maybeQuote.isEmpty()) {
       context.response()
         .setStatusCode(HttpResponseStatus.NOT_FOUND.code())

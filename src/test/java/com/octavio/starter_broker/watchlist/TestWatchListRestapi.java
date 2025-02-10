@@ -1,7 +1,9 @@
 package com.octavio.starter_broker.watchlist;
 
+import com.octavio.starter_broker.AbstractRestApiTest;
 import com.octavio.starter_broker.MainVerticle;
 import com.octavio.starter_broker.assets.Asset;
+import com.octavio.starter_broker.config.ConfigLoader;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -23,18 +25,14 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
-public class TestWatchListRestapi {
+public class TestWatchListRestapi extends AbstractRestApiTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestWatchListRestapi.class);
 
-  @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new MainVerticle()).onComplete(testContext.succeeding(id -> testContext.completeNow()));
-  }
-
   @Test
   void adds_and_returns_watch_list_for_account(Vertx vertx, VertxTestContext testContext) throws Throwable {
-    var webclient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var webclient = WebClient.create(vertx, new WebClientOptions()
+      .setDefaultPort(TEST_SERVER_PORT));
     var accountId = UUID.randomUUID();
     webclient.post("/account/watchlist/" + accountId)
       .sendJsonObject(getJson())
@@ -62,7 +60,8 @@ public class TestWatchListRestapi {
 
   @Test
   void adds_and_deletes_watch_list_for_account(Vertx vertx, VertxTestContext testContext) throws Throwable {
-    var webclient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var webclient = WebClient.create(vertx, new WebClientOptions()
+      .setDefaultPort(TEST_SERVER_PORT));
     var accountId = UUID.randomUUID();
     webclient.post("/account/watchlist/" + accountId)
       .sendJsonObject(getJson())

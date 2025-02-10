@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static com.octavio.starter_broker.assets.AssetsRestApi.ASSETS;
 
 

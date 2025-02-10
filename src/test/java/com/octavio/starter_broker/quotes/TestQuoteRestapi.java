@@ -1,6 +1,8 @@
 package com.octavio.starter_broker.quotes;
 
+import com.octavio.starter_broker.AbstractRestApiTest;
 import com.octavio.starter_broker.MainVerticle;
+import com.octavio.starter_broker.config.ConfigLoader;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -15,18 +17,14 @@ import org.slf4j.LoggerFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
-public class TestQuoteRestapi {
+public class TestQuoteRestapi extends AbstractRestApiTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestQuoteRestapi.class);
 
-  @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new MainVerticle()).onComplete(testContext.succeeding(id -> testContext.completeNow()));
-  }
-
   @Test
   void returns_quote_for_assets(Vertx vertx, VertxTestContext testContext) throws Throwable {
-    var webclient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var webclient = WebClient.create(vertx, new WebClientOptions()
+      .setDefaultPort(TEST_SERVER_PORT));
     webclient.get("/quotes/Luiza/1")
       .send()
       .onComplete(testContext.succeeding(response -> {
@@ -40,7 +38,8 @@ public class TestQuoteRestapi {
 
   @Test
   void returns_not_found_for_anknow_asset(Vertx vertx, VertxTestContext testContext) throws Throwable {
-    var webclient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(MainVerticle.PORT));
+    var webclient = WebClient.create(vertx, new WebClientOptions()
+      .setDefaultPort(TEST_SERVER_PORT));
     webclient.get("/quotes/Luiza/1")
       .send()
       .onComplete(testContext.succeeding(response -> {

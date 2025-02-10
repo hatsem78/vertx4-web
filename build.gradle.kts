@@ -1,5 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import java.util.regex.Pattern.compile
+
 
 plugins {
   application
@@ -44,6 +46,7 @@ dependencies {
   implementation("io.vertx:vertx-core")
   implementation("io.vertx:vertx-web:$vertxWebVersion")
   implementation("io.vertx:vertx-web-client:$vertxWebVersionClient")
+  implementation("io.vertx:vertx-config:4.5.12")
   implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
   implementation("org.apache.logging.log4j:log4j-api")
   implementation("org.apache.logging.log4j:log4j-core")
@@ -52,7 +55,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:$projectlombok")
   annotationProcessor("org.projectlombok:lombok:$projectlombok")
 
-  testImplementation("io.vertx:vertx-junit5:$vertxVersion")
+
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
   testCompileOnly("org.projectlombok:lombok:$projectlombok")

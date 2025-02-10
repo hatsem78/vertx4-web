@@ -1,58 +1,57 @@
 package com.octavio.starter_broker;
 
-import com.octavio.starter_broker.assets.AssetsRestApi;
-import com.octavio.starter_broker.quotes.QuotesResApi;
-import com.octavio.starter_broker.watchlist.WatchListResAPI;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
+import com.octavio.starter_broker.config.ConfigLoader;
+import io.vertx.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MainVerticle extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(MainVerticle.class);
-  public static final int PORT = 8888;
 
   public static void main(String[] args) {
     var vertx = Vertx.vertx();
-    vertx.deployVerticle(new MainVerticle());
+    vertx.exceptionHandler(error ->
+      LOG.error("Unhandled:", error)
+    );
+    vertx.deployVerticle(new MainVerticle())
+      .onFailure(err -> LOG.error("Failed to deploy:", err))
+      .onSuccess(id ->
+        LOG.info("Deployed {} with id {}", MainVerticle.class.getSimpleName(), id)
+      );
   }
+
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
-    final Router restApi = Router.router(vertx);
-    restApi
-      .route()
-      .handler(BodyHandler.create())
-      .failureHandler(errorContext->{
-      if(errorContext.response().ended()){
-        return;
-      }
-      LOG.error("Router error", errorContext.failure());
+    vertx.deployVerticle(VersionInfoVerticle.class.getName())
+      .onFailure(startPromise::fail)
+      .onSuccess(id -> LOG.info("Deployed {} with id {}", VersionInfoVerticle.class.getSimpleName(), id))
+      //.compose(next -> migrateDatabase())
+      .onFailure(startPromise::fail)
+      //.onSuccess(id -> LOG.info("Migrated db schema to latest version!"))
+      .compose(next -> deployRestApiVerticle(startPromise));
+  }
 
-      errorContext.response()
-        .setStatusCode(500)
-        .end(new JsonObject().put("message", "Somthing went error :(").toBuffer());
+//  private Future<Void> migrateDatabase() {
+//    return ConfigLoader.load(vertx)
+//      .compose(config -> {
+//        return FlywayMigration.migrate(vertx, config.getDbConfig());
+//      });
+//  }
 
-    });
-
-    AssetsRestApi.attach(restApi);
-    QuotesResApi.attach(restApi);
-    WatchListResAPI.attach(restApi);
-
-    vertx.createHttpServer().requestHandler(restApi)
-      .exceptionHandler(error->LOG.error("Http Server error {}", error.getMessage()))
-      .listen(PORT)
-      .onComplete(http -> {
-        if (http.succeeded()) {
-          startPromise.complete();
-          LOG.info("HTTP server started on port 8888");
-        } else {
-          startPromise.fail(http.cause());
-        }
+  private Future<String> deployRestApiVerticle(final Promise<Void> startPromise) {
+    return vertx.deployVerticle(RestApiVerticle.class.getName(),
+        new DeploymentOptions().setInstances(halfProcessors())
+      )
+      .onFailure(startPromise::fail)
+      .onSuccess(id -> {
+        LOG.info("Deployed {} with id {}", RestApiVerticle.class.getSimpleName(), id);
+        startPromise.complete();
       });
   }
+
+  private int halfProcessors() {
+    return Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
+  }
+
 }
