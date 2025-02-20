@@ -7,7 +7,10 @@
     </Appenders>
     <Loggers>
 
-        <Logger name="com.octavio" level="DEBUG" />
+        <Logger name="com.octavio" level="DEBUG"/>
+        <logger name="io.netty" level="warn"/>
+        <logger name="io.vertx" level="info"/>
+        <logger name="org.flywaydb.core" level="info"/>
 
         <Root level="INFO">
             <AppenderRef ref="Console"/>
